@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Insurance Regulation Assistant</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: white;
+            width: 600px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+            color: #1e3c72;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background-color: #1e3c72;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #16305c;
+        }
+
+        #answer {
+            margin-top: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            color: gray;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Insurance Regulation Assistant</h2>
+
+    <input 
+        type="text" 
+        id="question" 
+        placeholder="Ask your question (e.g., What does Act mean?)"
+    >
+
+    <button onclick="askQuestion()">Ask</button>
+
+    <div id="answer"></div>
+</div>
+
+<script>
+async function askQuestion() {
+    const question = document.getElementById("question").value.trim();
+    const answerDiv = document.getElementById("answer");
+
+    if (!question) {
+        answerDiv.innerHTML = "<p class='error'>Please enter a question.</p>";
+        return;
+    }
+
+    answerDiv.innerHTML = "<p class='loading'>Generating answer...</p>";
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/ask", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ question })
+        });
+
+        if (!response.ok) {
+            throw new Error("Server error");
+        }
+
+        const data = await response.json();
+
+        let html = "<ul>";
+        data.answer.forEach(point => {
+            html += `<li>${point}</li>`;
+        });
+        html += "</ul>";
+
+        answerDiv.innerHTML = html;
+
+    } catch (error) {
+        answerDiv.innerHTML = "<p class='error'>Failed to connect to API.</p>";
+        console.error(error);
+    }
+}
+</script>
+
+</body>
+</html>
